@@ -11,7 +11,7 @@ type Game struct {
 	Cols int
 }
 
-// CreateGame creates the board
+// CreateGame creates the Game and Grid
 func CreateGame(x int, y int) Game {
 	rows := x
 	cols := y
@@ -19,23 +19,8 @@ func CreateGame(x int, y int) Game {
 	return game
 }
 
-// RunGame runs the game
-func RunGame(g *Game) {
-	grid := BuildGrid(g)
-
-	for {
-		print("\033[H\033[2J")
-		for i := 0; i < g.Rows; i++ {
-			Generation(&grid[i])
-			fmt.Print(grid[i])
-			fmt.Println("")
-		}
-		time.Sleep(time.Second)
-	}
-}
-
 // BuildGrid builds the grid
-func BuildGrid(g *Game) []int {
+func BuildGrid(g Game) []int {
 	grid := []int{}
 	for i := 0; i < g.Rows; i++ {
 		grid = append(grid, 0)
@@ -43,11 +28,49 @@ func BuildGrid(g *Game) []int {
 	return grid
 }
 
-// Generation looks at a cell in each generation and changes it according to the rules
-func Generation(cell *int) {
-	if *cell == 0 {
-		*cell = 1
-	} else {
-		*cell = 0
+// RunGame runs the game
+func RunGame(game Game, grid []int) {
+	for {
+		for i := 0; i < game.Rows; i++ {
+			print("\033[H\033[2J")
+			Generation(grid, i)
+			PrintGeneration(grid)
+		}
+		fmt.Println("")
+		time.Sleep(time.Second / 10)
 	}
+}
+
+// Generation changes the ecosystem for each round
+func Generation(g []int, i int) {
+	if i == 0 {
+		g[i] = SetFirstCell(g)
+	} else {
+		g[i], g[i-1] = g[i-1], g[i]
+	}
+}
+
+// SetFirstCell determines if first cell is alive or dead
+func SetFirstCell(g []int) int {
+	for _, cell := range g {
+		if cell == 1 {
+			return 0
+		}
+	}
+	return 1
+}
+
+// PrintGeneration prints out what each generation looks like
+func PrintGeneration(g []int) {
+	for i := 0; i < len(g); i++ {
+		fmt.Print(StringifyCell(g[i]))
+	}
+}
+
+// StringifyCell turns integer into string
+func StringifyCell(c int) string {
+	if c == 0 {
+		return " "
+	}
+	return "*"
 }
