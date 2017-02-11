@@ -49,7 +49,7 @@ func RunGame(g Game) {
 
 	for i := 0; i < 1000; i++ {
 		PrintGeneration(grid)
-		time.Sleep(time.Second / 20)
+		time.Sleep(time.Second / 4)
 
 		newGrid := BuildGrid(g)
 		for x := 0; x < len(grid); x++ {
@@ -68,25 +68,32 @@ func Generation(g [][]int, x int, y int) int {
 		count := 0
 		for i := -1; i <= 1; i++ {
 			for j := -1; j <= 1; j++ {
-				if i != 0 && j != 0 {
+				if !(i == 0 && j == 0) {
 					if g[x+i][y+j] == 1 {
 						count++
 					}
 				}
 			}
 		}
-		c := Rules(count)
+		c := Rules(count, g, x, y)
 		return c
 	}
 	return 0
 }
 
 // Rules takes the living neighbor count and determines whether a cell is alive or dead
-func Rules(c int) int {
-	if c < 1 || c > 3 {
-		return 0
+func Rules(c int, g [][]int, x int, y int) int {
+	if g[x][y] == 1 {
+		if c < 2 || c > 3 {
+			return 0
+		} else if c == 2 || c == 3 {
+			return 1
+		}
 	}
-	return 1
+	if c == 3 {
+		return 1
+	}
+	return 0
 }
 
 // PrintGeneration prints out what each generation looks like
