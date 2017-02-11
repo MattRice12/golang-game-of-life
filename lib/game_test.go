@@ -21,48 +21,64 @@ func TestBuildGrid(t *testing.T) {
 	assert.Equal(t, [][]int{{0, 0, 0, 0}}, grid)
 }
 
-func TestGenerationRow(t *testing.T) {
-	game := CreateGame(4, 1)
+func TestGenerationCell(t *testing.T) {
+	game := CreateGame(4, 4)
 	grid := BuildGrid(game)
+	start := [][]int{{2, 1}, {2, 2}, {2, 3}, {1, 3}, {0, 2}}
+	InitialBuild(&grid, start)
+
+	cell := 0
 	for x := 0; x < len(grid); x++ {
 		for y := 0; y < len(grid[x]); y++ {
-			Generation(&grid, x, y)
+			cell = Generation(grid, x, y)
 		}
 	}
-	assert.Equal(t, [][]int{{0, 0, 0, 1}}, grid)
+	assert.Equal(t, 0, cell)
 
 	for x := 0; x < len(grid); x++ {
 		for y := 0; y < len(grid[x]); y++ {
-			Generation(&grid, x, y)
+			cell = Generation(grid, x, y)
 		}
 	}
-	assert.Equal(t, [][]int{{0, 0, 1, 0}}, grid)
+	assert.Equal(t, 0, cell)
 }
 
 func TestGenerationGrid(t *testing.T) {
-	game := CreateGame(3, 3)
+	game := CreateGame(4, 4)
 	grid := BuildGrid(game)
-	for x := 0; x < len(grid); x++ {
-		for y := 0; y < len(grid[x]); y++ {
-			Generation(&grid, x, y)
-		}
-	}
-	assert.Equal(t, [][]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, grid)
+	start := [][]int{{2, 1}, {2, 2}, {2, 3}, {1, 3}, {0, 2}}
+	InitialBuild(&grid, start)
+	newGrid := BuildGrid(game)
+
+	assert.Equal(t, [][]int{
+		{0, 0, 1, 0},
+		{0, 0, 0, 1},
+		{0, 1, 1, 1},
+		{0, 0, 0, 0}}, grid)
 
 	for x := 0; x < len(grid); x++ {
 		for y := 0; y < len(grid[x]); y++ {
-			Generation(&grid, x, y)
+			cell := Generation(grid, x, y)
+			newGrid[x][y] = cell
 		}
 	}
-	assert.Equal(t, [][]int{{0, 0, 0}, {0, 0, 0}, {0, 1, 0}}, grid)
-}
+	assert.Equal(t, [][]int{
+		{0, 0, 0, 0},
+		{0, 1, 1, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 0}}, newGrid)
 
-func TestSetFirstCell(t *testing.T) {
-	game := CreateGame(4, 1)
-	grid := BuildGrid(game)
-	firstCell := SetFirstCell(grid[0])
-	assert.Equal(t, 1, firstCell, "All other cells are dead; so firstCell should be alive")
-	assert.NotEqual(t, 0, firstCell)
+	for x := 0; x < len(grid); x++ {
+		for y := 0; y < len(grid[x]); y++ {
+			cell := Generation(newGrid, x, y)
+			newGrid[x][y] = cell
+		}
+	}
+	assert.Equal(t, [][]int{
+		{0, 0, 0, 0},
+		{0, 1, 0, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 0}}, newGrid)
 }
 
 func TestStringifyRow(t *testing.T) {

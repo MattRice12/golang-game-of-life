@@ -1,5 +1,14 @@
 # Game of Life
+Conway's Game of Life:
 
+  # General:
+  	Every cell interacts with its eight neighbors, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time (generation), the following transitions occur:
+
+  # Rules:
+  	1) Any live cell with fewer than two live neighbors die, as if by isolation
+  	2) Any live cell with two or three live neighbors lives on to the next generation
+  	3) Any live cell with more than three live neighbors dies, as if by overcrowding
+  	4) Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction
 
 # Plan
 
@@ -24,3 +33,19 @@
      - First cell in the row dies if any other cell is alive
      - First cell comes to life if all other cells are dead
      - Second cell (and n+1) comes to life if it has a living neighbor (living neighbor dies)
+
+  3. Structure -- Get Rows and Columns together to form a grid.
+
+  4. Rules -- Still basic rules. Same as in (2) above, but now life cascades down the grid (1 row at a time)
+
+  5. Play around with x and y axis, trying to figure out how to implement simple rules based on the status of neighboring cells.
+
+  6. Implement starting positions
+
+  7. Set up a counter for amount of living neighbors
+
+  8. Add game of life rules
+
+  9. Wait to update lifecycle until ALL cells have been accounted for (don't update as you go)
+
+  

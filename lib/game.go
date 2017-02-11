@@ -19,7 +19,7 @@ func CreateGame(x int, y int) Game {
 	return game
 }
 
-// BuildGrid builds the grid
+// BuildGrid builds the grid with all cells dead
 func BuildGrid(g Game) [][]int {
 	grid := [][]int{}
 	for i := 0; i < g.Cols; i++ {
@@ -31,52 +31,69 @@ func BuildGrid(g Game) [][]int {
 	return grid
 }
 
+// InitialBuild takes a multidimensional array with coordinates for living cells
+func InitialBuild(g *[][]int, arr [][]int) [][]int {
+	for s := range arr {
+		x := arr[s][0]
+		y := arr[s][1]
+		(*g)[x][y] = 1
+	}
+	return *g
+}
+
 // RunGame runs the game
 func RunGame(g Game) {
-	for {
-		grid := BuildGrid(g)
+	grid := BuildGrid(g)
+	start := [][]int{{2, 1}, {2, 2}, {2, 3}, {1, 3}, {0, 2}}
+	InitialBuild(&grid, start)
+
+	for i := 0; i < 1000; i++ {
+		PrintGeneration(grid)
+		time.Sleep(time.Second / 20)
+
+		newGrid := BuildGrid(g)
 		for x := 0; x < len(grid); x++ {
 			for y := 0; y < len(grid[x]); y++ {
-				Generation(&grid, x, y)
-				PrintGeneration(&grid)
-				time.Sleep(time.Second / 20)
+				cell := Generation(grid, x, y)
+				newGrid[x][y] = cell
 			}
 		}
+		grid = newGrid
 	}
 }
 
-// grid = [][]int
-// x = int
-// y = int
-// locate by: grid[x][y]
-
-// Generation changes the ecosystem for each round
-func Generation(grid *[][]int, x int, y int) {
-	if y == 0 {
-		(*grid)[x][y] = SetFirstCell((*grid)[x])
-		if x != 0 {
-			(*grid)[x-1][len((*grid)[x])-1] = 0
+// Generation determines whether the cell lives or dies based on the amount of living/dead neighbors
+func Generation(g [][]int, x int, y int) int {
+	if x > 0 && x < len(g)-1 && y > 0 && y < len(g[x])-1 {
+		count := 0
+		for i := -1; i <= 1; i++ {
+			for j := -1; j <= 1; j++ {
+				if i != 0 && j != 0 {
+					if g[x+i][y+j] == 1 {
+						count++
+					}
+				}
+			}
 		}
-	} else {
-		(*grid)[x][y], (*grid)[x][y-1] = (*grid)[x][y-1], (*grid)[x][y]
+		c := Rules(count)
+		return c
 	}
+	return 0
 }
 
-// SetFirstCell determines if first cell is alive or dead
-func SetFirstCell(cols []int) int {
-	for _, cell := range cols {
-		if cell == 1 {
-			return 0
-		}
+// Rules takes the living neighbor count and determines whether a cell is alive or dead
+func Rules(c int) int {
+	if c < 1 || c > 3 {
+		return 0
 	}
 	return 1
 }
 
 // PrintGeneration prints out what each generation looks like
-func PrintGeneration(g *[][]int) {
+func PrintGeneration(g [][]int) {
 	clearScreen()
-	for i := 0; i < len(*g); i++ {
-		gridString := StringifyRow((*g)[i])
+	for i := 0; i < len(g); i++ {
+		gridString := StringifyRow((g)[i])
 		for _, a := range gridString {
 			fmt.Print(a)
 		}
