@@ -14,3 +14,13 @@
     1. Implement simple rules (May already be completed by I.3.)
 
     2. Implement complex rules
+
+# Actual Process:
+
+  1. Structure -- Get single cell to alternate between life and death (1 and 0, respectively)
+     - This also bootstrapped getting a row to alternate (in unison) between life and death.
+
+  2. Rules -- Get single cell in row to alternate between life and death based on the state of itself and its neighbors.
+     - First cell in the row dies if any other cell is alive
+     - First cell comes to life if all other cells are dead
+     - Second cell (and n+1) comes to life if it has a living neighbor (living neighbor dies)

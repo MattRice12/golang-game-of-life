@@ -20,39 +20,51 @@ func CreateGame(x int, y int) Game {
 }
 
 // BuildGrid builds the grid
-func BuildGrid(g Game) []int {
-	grid := []int{}
-	for i := 0; i < g.Rows; i++ {
-		grid = append(grid, 0)
+func BuildGrid(g Game) [][]int {
+	grid := [][]int{}
+	for i := 0; i < g.Cols; i++ {
+		grid = append(grid, []int{})
+		for j := 0; j < g.Rows; j++ {
+			grid[i] = append(grid[i], 0)
+		}
 	}
 	return grid
 }
 
 // RunGame runs the game
-func RunGame(game Game, grid []int) {
+func RunGame(g Game) {
 	for {
-		for i := 0; i < game.Rows; i++ {
-			print("\033[H\033[2J")
-			Generation(grid, i)
-			PrintGeneration(grid)
+		grid := BuildGrid(g)
+		for x := 0; x < len(grid); x++ {
+			for y := 0; y < len(grid[x]); y++ {
+				Generation(&grid, x, y)
+				PrintGeneration(&grid)
+				time.Sleep(time.Second / 20)
+			}
 		}
-		fmt.Println("")
-		time.Sleep(time.Second / 10)
 	}
 }
 
+// grid = [][]int
+// x = int
+// y = int
+// locate by: grid[x][y]
+
 // Generation changes the ecosystem for each round
-func Generation(g []int, i int) {
-	if i == 0 {
-		g[i] = SetFirstCell(g)
+func Generation(grid *[][]int, x int, y int) {
+	if y == 0 {
+		(*grid)[x][y] = SetFirstCell((*grid)[x])
+		if x != 0 {
+			(*grid)[x-1][len((*grid)[x])-1] = 0
+		}
 	} else {
-		g[i], g[i-1] = g[i-1], g[i]
+		(*grid)[x][y], (*grid)[x][y-1] = (*grid)[x][y-1], (*grid)[x][y]
 	}
 }
 
 // SetFirstCell determines if first cell is alive or dead
-func SetFirstCell(g []int) int {
-	for _, cell := range g {
+func SetFirstCell(cols []int) int {
+	for _, cell := range cols {
 		if cell == 1 {
 			return 0
 		}
@@ -61,16 +73,30 @@ func SetFirstCell(g []int) int {
 }
 
 // PrintGeneration prints out what each generation looks like
-func PrintGeneration(g []int) {
-	for i := 0; i < len(g); i++ {
-		fmt.Print(StringifyCell(g[i]))
+func PrintGeneration(g *[][]int) {
+	clearScreen()
+	for i := 0; i < len(*g); i++ {
+		gridString := StringifyRow((*g)[i])
+		for _, a := range gridString {
+			fmt.Print(a)
+		}
+		fmt.Println()
 	}
 }
 
-// StringifyCell turns integer into string
-func StringifyCell(c int) string {
-	if c == 0 {
-		return " "
+// StringifyRow turns integer into string
+func StringifyRow(row []int) []string {
+	arr := []string{}
+	for _, b := range row {
+		if b == 0 {
+			arr = append(arr, " ")
+		} else {
+			arr = append(arr, "@")
+		}
 	}
-	return "*"
+	return arr
+}
+
+func clearScreen() {
+	print("\033[H\033[2J")
 }

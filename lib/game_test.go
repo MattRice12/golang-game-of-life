@@ -18,43 +18,56 @@ func TestCreateGame(t *testing.T) {
 func TestBuildGrid(t *testing.T) {
 	game := CreateGame(4, 1)
 	grid := BuildGrid(game)
-	assert.Equal(t, []int{0, 0, 0, 0}, grid)
+	assert.Equal(t, [][]int{{0, 0, 0, 0}}, grid)
 }
 
-func TestGeneration(t *testing.T) {
+func TestGenerationRow(t *testing.T) {
 	game := CreateGame(4, 1)
 	grid := BuildGrid(game)
-	for i := 0; i < game.Rows; i++ {
-		Generation(grid, i)
+	for x := 0; x < len(grid); x++ {
+		for y := 0; y < len(grid[x]); y++ {
+			Generation(&grid, x, y)
+		}
 	}
-	assert.Equal(t, []int{0, 0, 0, 1}, grid)
+	assert.Equal(t, [][]int{{0, 0, 0, 1}}, grid)
 
-	for i := 0; i < game.Rows; i++ {
-		Generation(grid, i)
+	for x := 0; x < len(grid); x++ {
+		for y := 0; y < len(grid[x]); y++ {
+			Generation(&grid, x, y)
+		}
 	}
-	assert.Equal(t, []int{0, 0, 1, 0}, grid)
+	assert.Equal(t, [][]int{{0, 0, 1, 0}}, grid)
+}
+
+func TestGenerationGrid(t *testing.T) {
+	game := CreateGame(3, 3)
+	grid := BuildGrid(game)
+	for x := 0; x < len(grid); x++ {
+		for y := 0; y < len(grid[x]); y++ {
+			Generation(&grid, x, y)
+		}
+	}
+	assert.Equal(t, [][]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, grid)
+
+	for x := 0; x < len(grid); x++ {
+		for y := 0; y < len(grid[x]); y++ {
+			Generation(&grid, x, y)
+		}
+	}
+	assert.Equal(t, [][]int{{0, 0, 0}, {0, 0, 0}, {0, 1, 0}}, grid)
 }
 
 func TestSetFirstCell(t *testing.T) {
 	game := CreateGame(4, 1)
 	grid := BuildGrid(game)
-	firstCell := SetFirstCell(grid)
-
+	firstCell := SetFirstCell(grid[0])
 	assert.Equal(t, 1, firstCell, "All other cells are dead; so firstCell should be alive")
-
-	for i := 0; i < game.Rows; i++ {
-		Generation(grid, i)
-	}
-	firstCell = SetFirstCell(grid)
-	assert.Equal(t, 0, firstCell, "After the first generation, firstCell dies")
-
-	cellNeighbor := grid[len(grid)-1]
-	assert.Equal(t, 1, cellNeighbor, "In the second generation, firstCell's neighbor (cellNeighbor) comes to life")
+	assert.NotEqual(t, 0, firstCell)
 }
 
-func TestStringifyCell(t *testing.T) {
-	dead := StringifyCell(0)
-	alive := StringifyCell(1)
-	assert.Equal(t, " ", dead)
-	assert.Equal(t, "*", alive)
+func TestStringifyRow(t *testing.T) {
+	last := StringifyRow([]int{0, 0, 1})
+	middle := StringifyRow([]int{0, 1, 0})
+	assert.Equal(t, []string{" ", " ", "@"}, last)
+	assert.Equal(t, []string{" ", "@", " "}, middle)
 }
