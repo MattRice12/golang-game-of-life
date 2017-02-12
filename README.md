@@ -48,4 +48,15 @@ Conway's Game of Life:
 
   9. Wait to update lifecycle until ALL cells have been accounted for (don't update as you go)
 
-  
+  10. Game works.
+
+  11. Create new colony to spawn every 20 generations
+
+  12. When colony reaches bottom of grid, it should reappear at the top (ditto for sides)
+
+  13. Put `Grid` as a value in the Game struct.
+    - This didn't worked as much as I'd hoped because during every generation 2 grids should exist:
+      - 1 grid that holds the current generation's info (which I use to apply the rules to in order to determine life/death in the next generation)
+      - 1 grid that builds the next generation.
+    - So I'd either need 2 Grid values in the Game struct, or 2 functions/methods for each grid (one that references Game and one that outputs a value). Neither option seems efficient, so I'm not including Grid as a value in the struct.
+      - The downside is that for most functions I end up calling (game Game, grid [][]int) rather than just (g Game).

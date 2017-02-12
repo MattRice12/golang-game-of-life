@@ -6,84 +6,121 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateGame(t *testing.T) {
-	game := CreateGame(1, 1)
-	assert.NotNil(t, game)
-	assert.Equal(t, Game{1, 1}, game)
+// Grids purposefully made 2 dimension larger (both x and y) to provide for cleaner looping
+var (
+	Initial4x1 = [][]int{
+		{0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0}}
 
-	game = CreateGame(20, 20)
-	assert.Equal(t, Game{20, 20}, game)
+	Initial4x4 = [][]int{
+		{0, 0, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0},
+		{1, 0, 1, 0, 0, 0},
+		{0, 1, 1, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0}}
+)
+
+func TestCreateGame(t *testing.T) {
+	game := CreateGame(1, 1, [][]int{{}})
+	assert.NotNil(t, game)
+	assert.Equal(t, Game{3, 3, [][]int{{}}}, game)
+
+	game = CreateGame(20, 20, [][]int{{}})
+	assert.Equal(t, Game{22, 22, [][]int{{}}}, game)
 }
 
 func TestBuildGrid(t *testing.T) {
-	game := CreateGame(4, 1)
-	grid := BuildGrid(game)
-	assert.Equal(t, [][]int{{0, 0, 0, 0}}, grid)
+	game := CreateGame(4, 1, [][]int{{}})
+	grid := BlankGrid(game)
+
+	assert.NotNil(t, grid)
+	assert.Equal(t, Initial4x1, grid)
 }
 
-func TestGenerationCell(t *testing.T) {
-	game := CreateGame(4, 4)
-	grid := BuildGrid(game)
+func TestGeneration(t *testing.T) {
+	game := CreateGame(4, 4, [][]int{{}})
+	grid := BlankGrid(game)
 	start := [][]int{{2, 1}, {2, 2}, {2, 3}, {1, 3}, {0, 2}}
-	InitialBuild(&grid, start)
+	InitialCells(&grid, start)
+	assert.Equal(t, 1, grid[1][2]) // grid[y][x]
 
-	cell := 0
-	for x := 0; x < len(grid); x++ {
-		for y := 0; y < len(grid[x]); y++ {
-			cell = Generation(grid, x, y)
-		}
-	}
-	assert.Equal(t, 0, cell)
+	grid = GenNewGrid(game, grid)
+	assert.Equal(t, 0, grid[1][2]) // grid[y][x]
 
-	for x := 0; x < len(grid); x++ {
-		for y := 0; y < len(grid[x]); y++ {
-			cell = Generation(grid, x, y)
-		}
-	}
-	assert.Equal(t, 0, cell)
+	grid = GenNewGrid(game, grid)
+	assert.Equal(t, 1, grid[1][2]) // grid[y][x]
 }
 
-func TestGenerationGrid(t *testing.T) {
-	game := CreateGame(4, 4)
-	grid := BuildGrid(game)
+func TestInitialCells(t *testing.T) {
+	game := CreateGame(4, 4, [][]int{{}})
+	grid := BlankGrid(game)
 	start := [][]int{{2, 1}, {2, 2}, {2, 3}, {1, 3}, {0, 2}}
-	InitialBuild(&grid, start)
-	newGrid := BuildGrid(game)
+	InitialCells(&grid, start)
 
-	assert.Equal(t, [][]int{
-		{0, 0, 1, 0},
-		{0, 0, 0, 1},
-		{0, 1, 1, 1},
-		{0, 0, 0, 0}}, grid)
+	assert.Equal(t, Initial4x4, grid)
+}
 
-	for x := 0; x < len(grid); x++ {
-		for y := 0; y < len(grid[x]); y++ {
-			cell := Generation(grid, x, y)
-			newGrid[x][y] = cell
-		}
+func TestReinitialize(t *testing.T) {
+	start := [][]int{{2, 1}, {2, 2}, {2, 3}, {1, 3}, {0, 2}}
+	game := CreateGame(4, 4, start)
+	grid := BlankGrid(game)
+	InitialCells(&grid, start)
+
+	// Initial State before any Generations
+	assert.Equal(t, Initial4x4, grid)
+
+	for i := 0; i <= 10; i++ {
+		grid = GenNewGrid(game, grid)
+		Reinitialize(&grid, game, i)
 	}
-	assert.Equal(t, [][]int{
-		{0, 0, 0, 0},
-		{0, 1, 1, 0},
-		{0, 0, 1, 0},
-		{0, 0, 0, 0}}, newGrid)
+	// After 10 Generations, grid should be different
+	assert.NotEqual(t, Initial4x4, grid)
 
-	for x := 0; x < len(grid); x++ {
-		for y := 0; y < len(grid[x]); y++ {
-			cell := Generation(newGrid, x, y)
-			newGrid[x][y] = cell
-		}
+	// At 20 Generations, grid starting position reinitializes
+	Reinitialize(&grid, game, 20)
+	assert.Equal(t, Initial4x4, grid)
+}
+
+func TestRules(t *testing.T) {
+	start := [][]int{{1, 1}}
+	game := CreateGame(4, 4, start)
+	grid := BlankGrid(game)
+	InitialCells(&grid, start)
+	var output int
+	// For currently dead cells
+	y := 0
+	x := 0
+	for i := 0; i < 3; i++ {
+		output = Rules(i, grid, y, x)
+		assert.Equal(t, 0, output, "Expect 0 (death) -- Count == %v.", i)
 	}
-	assert.Equal(t, [][]int{
-		{0, 0, 0, 0},
-		{0, 1, 0, 0},
-		{0, 0, 1, 0},
-		{0, 0, 0, 0}}, newGrid)
+	output = Rules(3, grid, y, x)
+	assert.Equal(t, 1, output, "Expect 1 (life). Count == %v. Rule: 'Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction'", 3)
+
+	// For currently living cells
+	y = 1
+	x = 1
+	for i := 0; i < 2; i++ {
+		output = Rules(i, grid, y, x)
+		assert.Equal(t, 0, output, "Expect 0 (death). Count == %v. Rule: 'Any live cell with fewer than two live neighbors die, as if by isolation'", i)
+	}
+
+	for i := 2; i < 4; i++ {
+		output = Rules(i, grid, y, x)
+		assert.Equal(t, 1, output, "Expect 1 (life). Count == %v. Rule: 'Any live cell with two or three live neighbors lives on to the next generation'.", i)
+	}
+
+	for i := 4; i <= 8; i++ {
+		output = Rules(i, grid, y, x)
+		assert.Equal(t, 0, output, "Expect 0 (death). Count > 3. Rule: 'Any live cell with more than three live neighbors dies, as if by overcrowding'")
+	}
 }
 
 func TestStringifyRow(t *testing.T) {
 	last := StringifyRow([]int{0, 0, 1})
 	middle := StringifyRow([]int{0, 1, 0})
-	assert.Equal(t, []string{" ", " ", "@"}, last)
-	assert.Equal(t, []string{" ", "@", " "}, middle)
+	assert.Equal(t, []string{" ", " ", "*"}, last)
+	assert.Equal(t, []string{" ", "*", " "}, middle)
 }

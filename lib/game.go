@@ -41,29 +41,32 @@ func InitialCells(grid *[][]int, start [][]int) {
 	}
 }
 
-// RunGame runs the game
-func RunGame(game Game) {
-	grid := BlankGrid(game)
-	// source := [][]int{{1, 1}, {1, 2}, {2, 1}, {2, 2}, {2, 3}}
-
-	for i := 0; i < 1000; i++ {
-		Reinitialize(&grid, game, i)
-		PrintGeneration(grid)
-		newGrid := BlankGrid(game)
-		for y := range grid {
-			for x := range grid[y] {
-				newGrid[y][x] = Generation(grid, y, x)
-			}
-		}
-		grid = newGrid
-	}
-}
-
 // Reinitialize calls the initial build every 20 generations
 func Reinitialize(grid *[][]int, game Game, i int) {
 	if i%20 == 0 {
 		InitialCells(grid, game.Start)
 	}
+}
+
+// RunGame runs the game
+func RunGame(game Game) {
+	grid := BlankGrid(game)
+	for i := 0; i < 1000; i++ {
+		Reinitialize(&grid, game, i)
+		PrintGeneration(grid)
+		grid = GenNewGrid(game, grid)
+	}
+}
+
+// GenNewGrid makes a blank grid template and populates it
+func GenNewGrid(g Game, grid [][]int) [][]int {
+	newGrid := BlankGrid(g)
+	for y := range grid {
+		for x := range grid[y] {
+			newGrid[y][x] = Generation(grid, y, x)
+		}
+	}
+	return newGrid
 }
 
 // Generation determines whether the cell lives or dies based on the amount of living/dead neighbors
@@ -92,7 +95,7 @@ func BorderCells(grid [][]int, y int, x int) (int, int) {
 	}
 	if x == 0 {
 		x = len(grid[y]) - 2
-	} else if x >= len(grid[y])-1 {
+	} else if x == len(grid[y])-1 {
 		x = 1
 	}
 	return y, x
