@@ -73,13 +73,13 @@ func TestReinitialize(t *testing.T) {
 
 	for i := 0; i <= 10; i++ {
 		grid = GenNewGrid(game, grid)
-		Reinitialize(&grid, game, i)
+		InitializeGrid(&grid, game, i)
 	}
 	// After 10 Generations, grid should be different
 	assert.NotEqual(t, Initial4x4, grid)
 
 	// At 20 Generations, grid starting position reinitializes
-	Reinitialize(&grid, game, 20)
+	InitializeGrid(&grid, game, 20)
 	assert.Equal(t, Initial4x4, grid)
 }
 
@@ -123,4 +123,21 @@ func TestStringifyRow(t *testing.T) {
 	middle := StringifyRow([]int{0, 1, 0})
 	assert.Equal(t, []string{" ", " ", "*"}, last)
 	assert.Equal(t, []string{" ", "*", " "}, middle)
+}
+
+func TestFindPattern(t *testing.T) {
+	pattern, width, height := findPattern("glider")
+	assert.Equal(t, []int{3, 2}, pattern[0])
+	assert.Equal(t, 30, width)
+	assert.Equal(t, 15, height)
+
+	pattern, width, height = findPattern("pulsar")
+	assert.Equal(t, []int{12, 16}, pattern[0])
+	assert.Equal(t, 40, width)
+	assert.Equal(t, 20, height)
+
+	pattern, width, height = findPattern("gun")
+	assert.Equal(t, []int{3, 13}, pattern[0])
+	assert.Equal(t, 50, width)
+	assert.Equal(t, 30, height)
 }

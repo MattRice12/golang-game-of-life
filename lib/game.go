@@ -20,6 +20,18 @@ func CreateGame(x int, y int, s [][]int) Game {
 	return game
 }
 
+// RunGame runs the game
+func RunGame(game Game) {
+	grid := BlankGrid(game)
+	// Turn ln27 off and ln29 on for cool stuff!
+	InitialCells(&grid, game.Start)
+	for i := 0; i < 1000; i++ {
+		// InitializeGrid(&grid, game, i)
+		PrintGeneration(grid)
+		grid = GenNewGrid(game, grid)
+	}
+}
+
 // BlankGrid builds a grid template with all cells dead
 func BlankGrid(g Game) [][]int {
 	grid := [][]int{}
@@ -32,29 +44,19 @@ func BlankGrid(g Game) [][]int {
 	return grid
 }
 
+// InitializeGrid calls the initial build every 20 generations
+func InitializeGrid(grid *[][]int, game Game, i int) {
+	if i%20 == 0 {
+		InitialCells(grid, game.Start)
+	}
+}
+
 // InitialCells takes a multidimensional array with coordinates for living cells
 func InitialCells(grid *[][]int, start [][]int) {
 	for i := range start {
 		x := &start[i][0]
 		y := &start[i][1]
 		(*grid)[*y][*x] = 1
-	}
-}
-
-// Reinitialize calls the initial build every 20 generations
-func Reinitialize(grid *[][]int, game Game, i int) {
-	if i%20 == 0 {
-		InitialCells(grid, game.Start)
-	}
-}
-
-// RunGame runs the game
-func RunGame(game Game) {
-	grid := BlankGrid(game)
-	for i := 0; i < 1000; i++ {
-		Reinitialize(&grid, game, i)
-		PrintGeneration(grid)
-		grid = GenNewGrid(game, grid)
 	}
 }
 
@@ -118,7 +120,7 @@ func Rules(c int, grid [][]int, y int, x int) int {
 
 // PrintGeneration prints out what each generation looks like
 func PrintGeneration(grid [][]int) {
-	clearScreen()
+	ClearScreen()
 	for i := 0; i < len(grid)-2; i++ {
 		gridString := StringifyRow((grid)[i])
 		for i := 0; i < len(gridString)-2; i++ {
@@ -142,6 +144,7 @@ func StringifyRow(row []int) []string {
 	return strArr
 }
 
-func clearScreen() {
+// ClearScreen clears the screen
+func ClearScreen() {
 	print("\033[H\033[2J")
 }

@@ -43,16 +43,21 @@ Conway's Game of Life:
   6. Implement starting positions
 
   7. Set up a counter for amount of living neighbors
+    - My counter doesn't work well on border cells, so I added a 1 unit buffer on all sides to prevent going over or under the index limit when iterating.
+    - This border is hidden from the user.
 
   8. Add game of life rules
+    - For some reason, generation is not occurring correctly. It's not counting right.
 
   9. Wait to update lifecycle until ALL cells have been accounted for (don't update as you go)
 
-  10. Game works.
+  10. Game works!
+    - My counter wasn't counting right (in step 8) because of truth values. (i != 0 && j != 0) is not the same as !(i == 0 && j == 0).
 
   11. Create new colony to spawn every 20 generations
 
   12. When colony reaches bottom of grid, it should reappear at the top (ditto for sides)
+    - To loop, I set the first row/column to equal the last row/column and visa versa (because these columns are hidden [step 7], looping is seamless)
 
   13. Put `Grid` as a value in the Game struct.
     - This didn't worked as much as I'd hoped because during every generation 2 grids should exist:
@@ -60,3 +65,11 @@ Conway's Game of Life:
       - 1 grid that builds the next generation.
     - So I'd either need 2 Grid values in the Game struct, or 2 functions/methods for each grid (one that references Game and one that outputs a value). Neither option seems efficient, so I'm not including Grid as a value in the struct.
       - The downside is that for most functions I end up calling (game Game, grid [][]int) rather than just (g Game).
+
+  14. Fix all the tests I broke. Create new ones.
+
+  15. Add in other starting game of life patterns. Create separate file for patterns. Prompt user to select from 3 patterns.
+
+  16. About to make my final commit and realized the repeater (*InitializeGrid*) I put in for `glider` changed how `pulsar` and `gun` were supposed to look (but in a cool way). I thought about giving the user the choice whether to enable the repeater, but I think I'm already asking for enough input from the user, so I just commented calling the method out (see *RunGame* ln 27 and 29)
+
+  17. Gun also does some cool stuff after about 300 without the repeater, but then dwindles into nothing around 800-900 loops.
